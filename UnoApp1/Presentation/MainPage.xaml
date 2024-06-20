@@ -5,8 +5,16 @@
       xmlns:uen="using:Uno.Extensions.Navigation.UI"
       xmlns:utu="using:Uno.Toolkit.UI"
       xmlns:um="using:Uno.Material"
+      xmlns:converters="using:UnoApp1.Presentation.Converters"
       NavigationCacheMode="Required"
       Background="{ThemeResource BackgroundBrush}">
+  <Page.Resources>
+    <x:String x:Key="IconSource_Delete">F1 M 1 16 C 1 17.100000023841858 1.899999976158142 18 3 18 L 11 18 C 12.100000023841858 18 13 17.100000023841858 13 16 L 13 4 L 1 4 L 1 16 Z M 14 1 L 10.5 1 L 9.5 0 L 4.5 0 L 3.5 1 L 0 1 L 0 3 L 14 3 L 14 1 Z</x:String>
+    <converters:TimeSpanToHumanFriendlyStringConverter  x:Key="TimeSpanConverter"/>
+    <converters:DateTimeFormatStringConverter x:Key="DateTimeConverter" />
+    <converters:NullToActiveConverter x:Key="NullToActiveConverter" />
+    <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+  </Page.Resources>
 
   <Grid utu:SafeArea.Insets="VisibleBounds">
     <Grid.RowDefinitions>
@@ -15,15 +23,45 @@
     </Grid.RowDefinitions>
     <utu:NavigationBar Content="{Binding Title}" />
 
-    <StackPanel Grid.Row="1"
-          HorizontalAlignment="Center"
-          VerticalAlignment="Center"
-          Spacing="16">
-      <TextBox Text="{Binding Name, Mode=TwoWay}"
-          PlaceholderText="Enter your name:" />
-      <Button Content="Go to Second Page"
-          AutomationProperties.AutomationId="SecondPageButton"
-          Command="{Binding GoToSecond}" />
-    </StackPanel>
+    <ScrollViewer Grid.Row="1" Padding="8" utu:AutoLayout.CounterAlignment="Stretch" utu:AutoLayout.PrimaryAlignment="Stretch">
+      <ItemsRepeater ItemsSource="{Binding Records}" uen:Navigation.Request="List_Template">
+        <ItemsRepeater.Layout>
+          <StackLayout Orientation="Vertical" Spacing="2" />
+        </ItemsRepeater.Layout>
+        <ItemsRepeater.ItemTemplate>
+          <DataTemplate>
+            <SwipeControl utu:AutoLayout.CounterAlignment="Stretch">
+              <SwipeControl.LeftItems>
+                <SwipeItems Mode="Reveal" />
+              </SwipeControl.LeftItems>
+              <SwipeControl.RightItems>
+                <SwipeItems Mode="Reveal">
+                  <!--Need to use Invoked because the Binding con Command doesn't work as expected on SwipeItem :( -->
+                  <!--Command="{Binding RemoveItem}" CommandParameter="{Binding .}"-->
+                  <SwipeItem Text="Remove"
+                         Invoked="RemoveItem_Invoked"
+                         >
+                    <SwipeItem.IconSource>
+                      <PathIconSource Data="{StaticResource IconSource_Delete}" />
+                    </SwipeItem.IconSource>
+                  </SwipeItem>
+                </SwipeItems>
+              </SwipeControl.RightItems>
+              <utu:AutoLayout Spacing="16" CounterAxisAlignment="Center" Orientation="Horizontal" Padding="16" HorizontalAlignment="Stretch">
+                <PersonPicture Width="60" Height="60" Initials="A" Background="#70ADE2" />
+                <utu:AutoLayout PrimaryAxisAlignment="Center" CounterAxisAlignment="Start" utu:AutoLayout.PrimaryAlignment="Stretch">
+                  <StackPanel Orientation="Horizontal">
+                    <TextBlock TextWrapping="Wrap" Text="{Binding StartTime, Converter={StaticResource DateTimeConverter}, ConverterParameter='dddd'}" utu:AutoLayout.CounterAlignment="Stretch" Foreground="{ThemeResource OnSurfaceVariantBrush}" Style="{StaticResource LabelSmall}" Margin="0,0,5,0"/>
+                    <TextBlock TextWrapping="Wrap" Text="{Binding StartTime, Converter={StaticResource DateTimeConverter}, ConverterParameter='HH:mm:ss'}" utu:AutoLayout.CounterAlignment="Stretch" Foreground="{ThemeResource OnSurfaceVariantBrush}" Style="{StaticResource LabelSmall}" />
+                  </StackPanel>
+                  <ProgressRing IsActive="{Binding Duration, Converter={StaticResource NullToActiveConverter}, ConverterParameter='inverse'}" Visibility="{Binding Duration, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='inverse'}" utu:AutoLayout.CounterAlignment="Start" Width="22" Height="22" />
+                  <TextBlock TextWrapping="Wrap" Text="{Binding Duration, Converter={StaticResource TimeSpanConverter}}" Visibility="{Binding Duration, Converter={StaticResource NullToVisibilityConverter}}" utu:AutoLayout.CounterAlignment="Stretch" Foreground="{ThemeResource OnSurfaceBrush}" Style="{StaticResource TitleMedium}" />
+                </utu:AutoLayout>
+              </utu:AutoLayout>
+            </SwipeControl>
+          </DataTemplate>
+        </ItemsRepeater.ItemTemplate>
+      </ItemsRepeater>
+    </ScrollViewer>
   </Grid>
 </Page>
