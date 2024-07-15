@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace UnoApp1.Models;
 
+public record FilteredRecordsGroup(string Filter, IImmutableList<Record> Records, bool IsExpanded);
+
 [ImplicitKeys(IsEnabled = false)]
 public record Record
 {
